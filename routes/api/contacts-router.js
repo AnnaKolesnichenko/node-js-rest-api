@@ -1,15 +1,8 @@
 import express from "express";
-import contactsService from '../../models/contactsController.js';
-import {HttpError} from '../../helpers/helpers.js';
-import Joi from "joi";
-
+import Controllers from "../../controllers/Controllers.js";
 const contactsRouter = express.Router();
 
-const contactAddSchema = Joi.object({
-  name: Joi.string().required,
-  email: Joi.string().required,
-  phone: Joi.string().required
-});
+
 
 
 contactsRouter.get('/', async (req, res) => {
@@ -40,16 +33,16 @@ contactsRouter.get('/:id', async (req, res, next) => {
 
 contactsRouter.post('/', async (req, res, next) => {
   try {
-    const {error} = contactAddSchema.validate(req.body);
-    if(error) {
-      throw HttpError(404, 'missing required name field');
-    }
-    const data = await contactsService.updateContactById(id, req.body);
-    if(!data) {
-      throw HttpError(404, 'Such contact not found');
+    const {name, phone, email} = req.body;
+    const { error } = contactAddSchema.validate({ name, phone, email });
+    if(error || !name || !phone || !email) {
+      return res.status(400).json({
+        message: 'there is a missing field',
+    });
     }
 
-    res.json(data);
+    const data = await contactsService.addContact({name, email, phone});
+    res.status(201).json(data);
   }
   catch(error) {
     next(error);
@@ -73,10 +66,21 @@ contactsRouter.delete('/:contactId', async (req, res, next) => {
 
 contactsRouter.put('/:contactId', async (req, res, next) => {
   try {
-    const {error} = contactAddSchema.validate(req.body);
-    if(error) {
-      throw HttpError(404, error.message);
+    const contactId = req.params.contactId;
+    const {name, email, phone} = req.body;
+   
+    if(!name || !email || !phone) {
+      throw HttpError(404, 'Missing fields');
     }
+
+    const updatedContactById = await contactsService.updateContactById(contactId, name, email, phone);
+    if(!updatedContactById) {
+      return res.status(404).json({
+        message: 'Not Found',
+    });
+    }
+    res.status(200).json(updatedContactById);
+    
   }
   catch(error) {
     next(error);

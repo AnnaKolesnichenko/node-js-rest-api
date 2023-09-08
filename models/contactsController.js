@@ -22,13 +22,34 @@ const getContactById = async (contactId) => {
     return data;
 }
 
-const updateContactById = async (id, contact) => {
+const updateContactById = async ({id, name, email, phone}) => {
     const contacts = await listContacts();
-    const index = contacts.find(item => item.id === id);
+    const index = contacts.find(item => {
+        if(item.id === id) {
+            item.name = name;
+            item.email = email;
+            item.phone = phone;
+            return item;
+        }
+    
+    });
     if(index === -1) {
         return null;
     }
-    contacts[index] = {id, ...data};
+
+    // if(contact.name !== undefined) {
+    //     contacts[index].name = contact.name;
+    // }
+
+    // if(contact.email !== undefined) {
+    //     contacts[index].email = contact.email;
+    // }
+
+    // if(contact.phone !== undefined) {
+    //     contacts[index].phone = contact.phone;
+    // }
+    // const updated = {...contact[index], ...contact};
+    // contacts[index] = updated;
     await writeContacts(contacts);
     return contacts[index];
 }
@@ -53,7 +74,7 @@ const addContact = async ({name, email, phone}) => {
         phone,
     }
     res.push(newContact);
-    writeContacts(res);
+   await writeContacts(res);
 
     return newContact;
 }

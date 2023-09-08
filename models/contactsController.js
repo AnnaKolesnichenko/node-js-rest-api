@@ -37,19 +37,6 @@ const updateContactById = async ({id, name, email, phone}) => {
         return null;
     }
 
-    // if(contact.name !== undefined) {
-    //     contacts[index].name = contact.name;
-    // }
-
-    // if(contact.email !== undefined) {
-    //     contacts[index].email = contact.email;
-    // }
-
-    // if(contact.phone !== undefined) {
-    //     contacts[index].phone = contact.phone;
-    // }
-    // const updated = {...contact[index], ...contact};
-    // contacts[index] = updated;
     await writeContacts(contacts);
     return contacts[index];
 }

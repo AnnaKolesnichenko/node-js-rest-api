@@ -29,13 +29,11 @@ const updateContactById = async ({id, name, email, phone}) => {
             item.email = email;
             item.phone = phone;
             return item;
-        }
-    
+        }    
     });
     if(index === -1) {
         return null;
     }
-
     await writeContacts(contacts);
     return contacts[index];
 }

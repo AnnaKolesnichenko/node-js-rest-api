@@ -2,6 +2,7 @@ import express from "express";
 import Controllers from "../../controllers/Controllers.js";
 const contactsRouter = express.Router();
 
+
 contactsRouter.get('/', Controllers.GetAll);
 
 contactsRouter.get('/:id', Controllers.GetById);

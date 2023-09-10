@@ -53,22 +53,40 @@ const GetAll =  async (req, res) => {
 //     }
 //   };
 
-//   const AddContact = async (req, res, next) => {
-//     try {
-//       const { error } = contactAddSchema.validate(req.body);
-//       if(error) {
-//         return res.status(400).json({
-//           message: 'there is a missing field',
-//       });
-//       }
-  
-//       const data = await contactsService.addContact(req.body);
-//       res.status(201).json(data);
+const AddContact = async (req, res, next) => {
+  try {
+    const { error } = contactAddSchema.validate(req.body);
+    if(error) {
+      return res.status(400).json({
+        message: 'there is a missing field',
+    });
+    }
+
+    const data = await Contact.create(req.body);
+    res.status(201).json(data);
+  }
+  catch(error) {
+    next(error);
+  }
+};
+
+// const AddContact = async (req, res, next) => {
+//   try {
+//     const { error } = contactAddSchema.validate(req.body);
+//     if(error) {
+//       return res.status(400).json({
+//         message: 'there is a missing field',
+//     });
 //     }
-//     catch(error) {
-//       next(error);
-//     }
-//   };
+
+//     const data = await contactsService.addContact(req.body);
+//     res.status(201).json(data);
+//   }
+//   catch(error) {
+//     next(error);
+//   }
+// };
+
 
 //   const RemoveContact = async (req, res, next) => {
 //     try {

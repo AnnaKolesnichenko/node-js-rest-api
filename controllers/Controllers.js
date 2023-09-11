@@ -15,6 +15,10 @@ const contactChangeSchema = Joi.object({
   phone: Joi.string(),
 });
 
+const updateFavoriteSchema = Joi.object({
+  favorite: Joi.boolean.required(),
+});
+
 // const GetAll =  async (req, res) => {
 //     try {
 //         const data = await contactsService.listContacts();
@@ -115,7 +119,7 @@ const AddContact = async (req, res, next) => {
 const RemoveContact = async (req, res, next) => {
   try {
     const { id } = req.params;
-    res = await contactsService.removeContact(id);
+    res = await Contact.findByIdAndRemove(id);
     if (!data) {
       throw HttpError(404, "Such contact not found");
     }
@@ -174,10 +178,36 @@ const UpdateById = async (req, res, next) => {
   }
 };
 
+const UpdateFavoriteById = async (req, res, next) => {
+  try {
+    const { error } = updateFavoriteSchema.validate(req.body);
+    const contactId = req.params.contactId;
+
+    if (error) {
+      throw HttpError(404, "Missing field favorite");
+    }
+
+    const updatedContactById = await Contact.findByIdAndUpdate(
+      contactId,
+      req.body,
+      { new: true }
+    );
+    if (!updatedContactById) {
+      return res.status(404).json({
+        message: "Not Found",
+      });
+    }
+    res.status(200).json(updatedContactById);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
   GetAll,
   GetById,
   AddContact,
   RemoveContact,
   UpdateById,
+  UpdateFavoriteById,
 };

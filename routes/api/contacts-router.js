@@ -13,4 +13,10 @@ contactsRouter.post("/", Controllers.AddContact);
 
 contactsRouter.put("/:contactId", isValidId, Controllers.UpdateById);
 
+contactsRouter.patch(
+  "/:contactId/favorite",
+  isValidId,
+  Controllers.UpdateFavoriteById
+);
+
 export default contactsRouter;

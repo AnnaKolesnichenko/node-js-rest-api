@@ -64,7 +64,7 @@ const addContact = async ({name, email, phone}) => {
    await writeContacts(res);
 
     return newContact;
-}
+};
 
 
 export default {
@@ -73,4 +73,4 @@ export default {
   removeContact,
   addContact,
   updateContactById
-}
+};

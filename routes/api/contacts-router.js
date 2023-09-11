@@ -1,15 +1,16 @@
 import express from "express";
 import Controllers from "../../controllers/Controllers.js";
 const contactsRouter = express.Router();
+import isValidId from "../../middleware/isValidId.js";
 
-contactsRouter.get('/', Controllers.GetAll);
+contactsRouter.get("/", Controllers.GetAll);
 
-// contactsRouter.get('/:id', Controllers.GetById);
+contactsRouter.get("/:id", isValidId, Controllers.GetById);
 
-contactsRouter.post('/', Controllers.AddContact)
+contactsRouter.post("/", Controllers.AddContact);
 
 // contactsRouter.delete('/:contactId', Controllers.RemoveContact)
 
-// contactsRouter.put('/:contactId', Controllers.UpdateById)
+contactsRouter.put("/:contactId", isValidId, Controllers.UpdateById);
 
 export default contactsRouter;

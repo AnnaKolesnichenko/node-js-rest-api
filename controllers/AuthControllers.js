@@ -1,4 +1,3 @@
-import Joi from 'joi';
 import User from '../models/User.js';
 import HttpError from '../helpers/HttpError.js';
 import bcryptjs from 'bcryptjs';
@@ -6,18 +5,8 @@ import jwt from 'jsonwebtoken';
 import 'dotenv/config';
 const {JWT_SECRET} = process.env;
 
-const emailPattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+// const emailPattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
-const signUpSchema = Joi.object({
-    username: Joi.string().required(),
-    email: Joi.string().pattern(emailPattern).required(),
-    password: Joi.string().min(6).required()
-});
-
-const signInSchema = Joi.object({
-    email: Joi.string().pattern(emailPattern).required(),
-    password: Joi.string().min(6).required()
-});
 
 const signup = async(req, res) => {
     const {email, password} = req.body;
@@ -30,8 +19,8 @@ const signup = async(req, res) => {
 
     const newUser = await User.create({...req.body, password: hashPassword});
     res.status(201).json({
-        username: newUser.username,
-        email: newUser.email
+        email: newUser.email, 
+        subscription: newUser.subscription
     })
 };
 
@@ -51,20 +40,38 @@ const signin = async (req, res) => {
     const payload = {
         id: user._id,
     }
-    console.log(JWT_SECRET, 'the key');
+
     const token = jwt.sign(payload, JWT_SECRET, {expiresIn: "23h"});
+    await User.findByIdAndUpdate(user._id, token);
    
     res.json({
         token,
+        user: {
+            email: user.email,
+            subscription: user.subscription
+        }
     })
 };
 
 const getCurrent = (req, res) => {
-    const {email, password} = req.user;
+    const {email, username} = req.user;
+    res.json({
+        email,
+        username
+    })
+}
+
+const signOut = async (req, res) => {
+    const {_id} = req.user;
+    await User.findByIdAndUpdate(_id, {token: ''});
+    res.json({
+        message: "LogOut success"
+    })
 }
 
 export default {
     signup,
     signin,
-    getCurrent
+    getCurrent, 
+    signOut
 }

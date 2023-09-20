@@ -1,6 +1,7 @@
 import HttpError from "../helpers/HttpError.js";
 import Joi from "joi";
 import Contact from "../models/Contact.js";
+import 'dotenv/config';
 //import contactsService from '../models/contactsController.js';
 
 const contactAddSchema = Joi.object({
@@ -22,10 +23,10 @@ const updateFavoriteSchema = Joi.object({
 const GetAll = async (req, res) => {
   const {_id: owner} = req.user;
   const {page = 1, limit = 10} = req.query;
-  const skip = (page - 1) *limit;
+  const skip = (page - 1) * limit;
 
   try {
-    const data = await Contact.find({owner}, "-createdAt -updatedAt", {skip, limit}).populate('owner');
+    const data = await Contact.find({owner}, {skip, limit}).populate('owner', "email");
     res.json(data);
   } catch (error) {
     res.status(500).json({
@@ -38,7 +39,7 @@ const GetAll = async (req, res) => {
 const GetById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const data = await Contact.findById({ id });
+    const data = await Contact.findById(id);
     if (!data) {
       throw HttpError(404, "Such contact not found");
     }

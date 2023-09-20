@@ -1,28 +1,20 @@
 import express from "express";
-// import * as userSchema from '../../models/User.js';
-// import isValidId from "../../middleware/isValidId.js";
+import {validateSignIn} from '../../middleware/validateSchema.js';
+import {validateSignUp} from '../../middleware/validateSchema.js';
 import AuthControllers from "../../controllers/AuthControllers.js";
 import authenticate from "../../middleware/authenticate.js";
 
-const signUpSchema = Joi.object({
-    username: Joi.string().required(),
-    email: Joi.string().pattern(emailPattern).required(),
-    password: Joi.string().min(6).required()
-});
+// const emailPattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
-const signInSchema = Joi.object({
-    email: Joi.string().pattern(emailPattern).required(),
-    password: Joi.string().min(6).required()
-});
 
 const authRouter = express.Router();
 
-authRouter.post('/signup', signUpSchema, AuthControllers.signup);
+authRouter.post('/signup', validateSignIn, AuthControllers.signup);
 
-authRouter.post('/signin', signInSchema, AuthControllers.signin);
+authRouter.post('/signin', validateSignUp, AuthControllers.signin);
 
 authRouter.get('/current', authenticate, AuthControllers.getCurrent);
 
-authRouter.post('/signout', authenticate, AuthControllers.signout);
+authRouter.post('/signout', authenticate, AuthControllers.signOut);
 
 export default authRouter;

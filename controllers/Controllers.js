@@ -22,11 +22,16 @@ const updateFavoriteSchema = Joi.object({
 
 const GetAll = async (req, res) => {
   const {_id: owner} = req.user;
-  const {page = 1, limit = 10} = req.query;
+  const {page = 1, limit = 10, favorite} = req.query;
   const skip = (page - 1) * limit;
 
+  const personalSearch = { owner };
+  if (favorite !== undefined) {
+    personalSearch.favorite = favorite === "true"; 
+  }
+
   try {
-    const data = await Contact.find({owner}, {skip, limit}).populate('owner', "email");
+    const data = await Contact.find(personalSearch, {skip, limit}).populate('owner', "email");
     res.json(data);
   } catch (error) {
     res.status(500).json({
@@ -39,7 +44,8 @@ const GetAll = async (req, res) => {
 const GetById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const data = await Contact.findById(id);
+    const personalSearch = {_id: id, owner: req.user._id}
+    const data = await Contact.findById(personalSearch);
     if (!data) {
       throw HttpError(404, "Such contact not found");
     }
@@ -71,7 +77,8 @@ const AddContact = async (req, res, next) => {
 const RemoveContact = async (req, res, next) => {
   try {
     const { id } = req.params;
-    res = await Contact.findByIdAndRemove(id);
+    const personalSearch = {_id: id, owner: req.user._id}
+    const data = await Contact.findByIdAndRemove(personalSearch);
     if (!data) {
       throw HttpError(404, "Such contact not found");
     }
@@ -86,13 +93,14 @@ const UpdateById = async (req, res, next) => {
   try {
     const { error } = contactChangeSchema.validate(req.body);
     const contactId = req.params.contactId;
+    const personalSearch = {_id: id, owner: req.user._id}
 
     if (error) {
       throw HttpError(404, "Missing fields");
     }
 
     const updatedContactById = await Contact.findByIdAndUpdate(
-      contactId,
+      personalSearch,
       req.body,
       { new: true }
     );
@@ -111,13 +119,14 @@ const UpdateFavoriteById = async (req, res, next) => {
   try {
     const { error } = updateFavoriteSchema.validate(req.body);
     const contactId = req.params.contactId;
+    const personalSearch = {_id: id, owner: req.user._id}
 
     if (error) {
       throw HttpError(404, "Missing field favorite");
     }
 
     const updatedContactById = await Contact.findByIdAndUpdate(
-      contactId,
+      personalSearch,
       req.body,
       { new: true }
     );

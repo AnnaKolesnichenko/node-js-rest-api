@@ -45,7 +45,7 @@ const GetById = async (req, res, next) => {
   try {
     const { id } = req.params;
     const personalSearch = {_id: id, owner: req.user._id}
-    const data = await Contact.findById(personalSearch);
+    const data = await Contact.findOne(personalSearch);
     if (!data) {
       throw HttpError(404, "Such contact not found");
     }
@@ -78,7 +78,7 @@ const RemoveContact = async (req, res, next) => {
   try {
     const { id } = req.params;
     const personalSearch = {_id: id, owner: req.user._id}
-    const data = await Contact.findByIdAndRemove(personalSearch);
+    const data = await Contact.findOneAndRemove(personalSearch);
     if (!data) {
       throw HttpError(404, "Such contact not found");
     }
@@ -99,7 +99,7 @@ const UpdateById = async (req, res, next) => {
       throw HttpError(404, "Missing fields");
     }
 
-    const updatedContactById = await Contact.findByIdAndUpdate(
+    const updatedContactById = await Contact.findOneAndUpdate(
       personalSearch,
       req.body,
       { new: true }
@@ -125,7 +125,7 @@ const UpdateFavoriteById = async (req, res, next) => {
       throw HttpError(404, "Missing field favorite");
     }
 
-    const updatedContactById = await Contact.findByIdAndUpdate(
+    const updatedContactById = await Contact.findOnendUpdate(
       personalSearch,
       req.body,
       { new: true }

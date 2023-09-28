@@ -24,6 +24,10 @@ const userSchema = new Schema({
           type: String,
           default: null,
         },
+        poster: {
+          type: String,
+          required: true,
+        },
         owner: {
             type: Schema.Types.ObjectId,
             ref: 'user',

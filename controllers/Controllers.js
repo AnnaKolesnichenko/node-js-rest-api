@@ -1,8 +1,13 @@
 import HttpError from "../helpers/HttpError.js";
+import cloudinary from "../helpers/cloudinary.js";
 import Joi from "joi";
 import Contact from "../models/Contact.js";
 import 'dotenv/config';
-//import contactsService from '../models/contactsController.js';
+import fs from 'fs/promises';
+import path from 'path';
+
+const posterPath = path.resolve('public', 'posters');
+
 
 const contactAddSchema = Joi.object({
   name: Joi.string().required(),
@@ -58,6 +63,13 @@ const GetById = async (req, res, next) => {
 
 const AddContact = async (req, res, next) => {
   const {_id: owner} = req.user;
+  const {path: oldPath, filename} = req.file;
+
+  const {uri: poster} = await cloudinary.uploader.upload(oldPath, {
+    folder: 'posters'
+  })
+  await fs.unlink(oldPath);
+
   try {
     const { error } = contactAddSchema.validate(req.body);
     if (error) {
@@ -66,7 +78,7 @@ const AddContact = async (req, res, next) => {
       });
     }
 
-    const data = await Contact.create({...req.body, owner});
+    const data = await Contact.create({...req.body, poster, owner});
     res.status(201).json(data);
   } catch (error) {
     next(error);

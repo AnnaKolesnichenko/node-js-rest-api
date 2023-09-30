@@ -3,9 +3,12 @@ import HttpError from '../helpers/HttpError.js';
 import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
-const {JWT_SECRET} = process.env;
+import path from "path";
+import fs from "fs/promises";
+import jimp from 'jimp';
+import gravatar from "gravatar";
 
-// const emailPattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+const {JWT_SECRET} = process.env;
 
 
 const signup = async(req, res) => {
@@ -16,11 +19,17 @@ const signup = async(req, res) => {
     }
 
     const hashPassword = await bcryptjs.hash(password, 10);
+    const posterUrl = gravatar.url(email, {
+        s: "200",
+        r: "pg",
+        d: "identicon",
+    })
 
-    const newUser = await User.create({...req.body, password: hashPassword});
+    const newUser = await User.create({...req.body, password: hashPassword, posterUrl});
     res.status(201).json({
         email: newUser.email, 
-        subscription: newUser.subscription
+        subscription: newUser.subscription,
+        posterUrl: newUser.poster
     })
 };
 
@@ -67,7 +76,36 @@ const signOut = async (req, res) => {
     res.json({
         message: "LogOut success"
     })
-}
+};
+
+const avatars = async (req, res) => {
+    const { _id: userId } = req.user;
+    if (!userId) {
+      return res.status(401).json({ message: "Not authorized" });
+    }
+    try {
+      const uniqueName = `${userId}_${Date.now()}${path.extname(
+        req.file.originalname
+      )}`;
+      const publicAvatars = path.join(process.cwd(), "public/avatars");
+      const avatarPath = path.join(publicAvatars, uniqueName);
+      const imagePath = req.file.path;
+      const image = await jimp.read(imagePath);
+      await image.resize(200, 200);
+      await image.writeAsync(imagePath);
+      await fs.rename(imagePath, avatarPath);
+      const avatarURL = `/avatars/${uniqueName}`;
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { avatarURL },
+        { new: true }
+      );
+      res.status(200).json({ updatedUser });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Server error" });
+    }
+  };
 
 export default {
     signup,

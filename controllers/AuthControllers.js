@@ -7,9 +7,10 @@ import path from "path";
 import fs from "fs/promises";
 import jimp from 'jimp';
 import gravatar from "gravatar";
+import { nanoid } from 'nanoid';
+import sendEmail from '../helpers/sendEmail.js';
 
 const {JWT_SECRET} = process.env;
-
 
 const signup = async(req, res) => {
     const {email, password} = req.body;
@@ -25,7 +26,15 @@ const signup = async(req, res) => {
         d: "identicon",
     })
 
-    const newUser = await User.create({...req.body, password: hashPassword, posterUrl});
+    const verificaitonCode = nanoid();
+    const newUser = await User.create({...req.body, password: hashPassword, posterUrl, verificaitonCode});
+    const verifyEmail = {
+        to: email,
+        subject: 'Verify email',
+        html: `<a target="_blank" href="http://localhost:3000/api/auth/verify/${verificaitonCode}">Click here to verify</a>`
+    }
+    await sendEmail(verifyEmail);
+    
     res.status(201).json({
         email: newUser.email, 
         subscription: newUser.subscription,
@@ -33,11 +42,50 @@ const signup = async(req, res) => {
     })
 };
 
+const verification = async (req, res) => {
+    const {verificaitonCode} = req.params;
+    const user = await User.findOne({verificaitonCode});
+    if(!user) {
+        throw HttpError(404);
+    }
+    await User.findByIdAndUpdate(user._id, {verify: true, verificaitonCode: ''});
+
+    res.json({
+        message: "Email verify success";
+    })
+};
+
+const verifyResend = () => {
+    const {email} = req.body;
+    const user = await User.findOne({email});
+    if(!user) {
+        throw HttpError(404, "Email not found");
+    }
+    if(user.verify) {
+        throw HttpError(400, 'Email already verified');
+    }
+
+    const verifyEmail = {
+        to: email,
+        subject: 'Verify email',
+        html: `<a target="_blank" href="http://localhost:3000/api/auth/verify/${user.verificaitonCode}">Click here to verify</a>`
+    }
+    await sendEmail(verifyEmail);
+
+    res.json({
+        message: "Verification email resend"
+    })
+}
+
 const signin = async (req, res) => {
     const {email, password} = req.body;
 
     const user = await User.findOne({email});
     if(!user) {
+        throw HttpError(401, 'User is not verified');
+    }
+
+    if(!user.verify) {
         throw HttpError(401, 'Email or password is invalid');
     }
 
@@ -111,5 +159,8 @@ export default {
     signup,
     signin,
     getCurrent, 
-    signOut
+    signOut, 
+    verification,
+    avatars, 
+    verifyResend
 }

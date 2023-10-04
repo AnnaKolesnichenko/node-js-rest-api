@@ -13,6 +13,12 @@ const signInSchema = Joi.object({
     password: Joi.string().min(6).required()
 });
 
+const userEmailSchema = () => {
+    Joi.object({
+        email: Joi.string().pattern(emailPattern).required(),
+    });
+}
+
 const validateSignUp = (req, res, next) => {
     const { error } = signUpSchema.validate(req.body);
     if (error) {
@@ -29,7 +35,18 @@ const validateSignIn = (req, res, next) => {
     next();
 };
 
+const validateEmail = (req, res, next) => {
+    const { error } = userEmailSchema.validate(req.body);
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+    }
+    next();
+};
+
+
+
 export {
     validateSignIn,
-    validateSignUp
+    validateSignUp,
+    validateEmail
 }

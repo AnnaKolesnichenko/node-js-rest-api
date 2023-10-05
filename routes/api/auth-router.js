@@ -1,6 +1,7 @@
 import express from "express";
 import {validateSignIn} from '../../middleware/validateSchema.js';
 import {validateSignUp} from '../../middleware/validateSchema.js';
+import { validateEmail } from "../../middleware/validateSchema.js";
 import AuthControllers from "../../controllers/AuthControllers.js";
 import authenticate from "../../middleware/authenticate.js";
 
@@ -16,5 +17,9 @@ authRouter.post('/signin', validateSignUp, AuthControllers.signin);
 authRouter.get('/current', authenticate, AuthControllers.getCurrent);
 
 authRouter.post('/signout', authenticate, AuthControllers.signOut);
+
+authRouter.post("/verify", validateEmail, AuthControllers.verifyResend);
+
+authRouter.get("/verify/:verificationToken", AuthControllers.verification);
 
 export default authRouter;

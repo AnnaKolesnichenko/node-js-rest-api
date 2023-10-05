@@ -2,8 +2,44 @@ import express from 'express';
 import logger from 'morgan';
 import cors from 'cors';
 import contactsRouter from './routes/api/contacts-router.js';
-import dotenv from 'dotenv';
+import dotenv from 'dotenv/config';
 import authRouter from './routes/api/auth-router.js';
+
+//import ElasticEmail from '@elasticemail/elasticemail-client';
+
+// const {ELASTIC_MAIL_API_KEY, ELASTIC_MAIL_FROM} = process.env;
+ 
+// let defaultClient = ElasticEmail.ApiClient.instance;
+ 
+// let {apikey} = defaultClient.authentications;
+// apikey.apiKey = ELASTIC_MAIL_API_KEY
+ 
+// let api = new ElasticEmail.EmailsApi()
+ 
+// let email = ElasticEmail.EmailMessageData.constructFromObject({
+//   Recipients: [
+//     new ElasticEmail.EmailRecipient("riwiy94211@gronasu.com")
+//   ],
+//   Content: {
+//     Body: [
+//       ElasticEmail.BodyPart.constructFromObject({
+//         ContentType: "HTML",
+//         Content: "My test email content ;)"
+//       })
+//     ],
+//     Subject: "test",
+//     From: ELASTIC_MAIL_FROM
+//   }
+// });
+ 
+// const callback = function(error, data, response) {
+//   if (error) {
+//     console.error(error);
+//   } else {
+//     console.log('API called successfully.');
+//   }
+// };
+// api.emailsPost(email, callback);
 
 dotenv.config();
 
